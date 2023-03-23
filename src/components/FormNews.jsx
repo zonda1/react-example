@@ -1,9 +1,9 @@
 import React,{useState} from 'react';
-import AddButton from './/UI/Add_button/Add_button';
+import AddButton from './UI/Add_button/Add_button';
 import Input from './UI/Inputs/Input';
 
 
-const Form_news = ({func}) => {
+const FormNews = ({func}) => {
 
     const [post, setPost] = useState({ title: '', descr: '' });
 
@@ -33,4 +33,4 @@ const Form_news = ({func}) => {
     );
 };
 
-export default Form_news;
+export default FormNews;

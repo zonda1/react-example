@@ -3,10 +3,10 @@ import './News_styles.css';
 import Add_button from './UI/Add_button/Add_button';
 
 
-function News({number,post,func}) {
+function News({number,post,remove}) {
     const {id,title,descr}=post;
 
-    const deleateCurrentPost=()=> func(id);
+    const deleateCurrentPost=()=> remove(id);
   
     return (<div className='news'>
       <div className='news__header'>

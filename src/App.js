@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useMemo } from 'react';
 import './App.css';
-import Form_news from './components/Form_news';
+import FormNews from './components/FormNews';
 
-import News from './components/News';
+import NewsList from './components/NewsList';
+import PostFilter from './components/PostFilter';
+import Input from './components/UI/Inputs/Input';
 import MySorting from './components/UI/Sorting/MySorting';
 
 function App() {
@@ -13,12 +16,28 @@ function App() {
     { id: 5, title: 'Kbr', descr: 'me4' },
   ]);
 
-  const [currentOptionValue, setCurrentOptionValue] = useState('');
+  const [filterPost, setFilterPost] = useState({ query: '', sort: '' });
 
-  const sortTopics = (sort) => {
-    setCurrentOptionValue(sort);
-    setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort])));
-  };
+  const sortedTopics = useMemo(() => {
+    // console.log('Hook 1 worked');
+    if (filterPost.sort) {
+      console.log(filterPost.sort);
+
+      return [...posts].sort((a, b) =>
+        a[filterPost.sort].localeCompare(b[filterPost.sort])
+      );
+    }
+    return posts;
+  }, [filterPost.sort, posts]);
+
+  const filterdTopics = useMemo(() => {
+    // console.log('Hook 2 worked');
+    return sortedTopics.filter((t) =>
+      t.title.toLowerCase().includes(filterPost.query)
+    );
+  }, [filterPost.query, sortedTopics]);
+
+  // console.log(filterdTopics);
 
   const addTopic = (post) => {
     setPosts([...posts, post]);
@@ -30,24 +49,11 @@ function App() {
   return (
     <div className='App'>
       <h1>Newspaper</h1>
-      <Form_news func={addTopic}></Form_news>
-      <MySorting
-        deafaultValue='Sorting'
-        options={[
-          { value: 'title', name: 'By title' },
-          { value: 'descr', name: 'By description' },
-        ]}
-        value={currentOptionValue}
-        onChange={sortTopics}
-      ></MySorting>
-      {posts.map((post, index) => (
-        <News
-          func={dealeateTopic}
-          number={index + 1}
-          post={post}
-          key={post.id}
-        ></News>
-      ))}
+      <FormNews func={addTopic}></FormNews>
+      <PostFilter filter={filterPost} setFilter={setFilterPost}></PostFilter>
+      <hr style={{ marginBottom: '10px', border: '2px solid #000' }}></hr>
+
+      <NewsList remove={dealeateTopic} posts={filterdTopics}></NewsList>
     </div>
   );
 }
