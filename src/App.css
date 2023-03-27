@@ -12,3 +12,10 @@ h1 {
 select {
   margin-bottom: 15px;
 }
+
+.pagination span {
+  padding: 5px;
+  border: 1px solid firebrick;
+  margin-right: 5px;
+  cursor: pointer;
+}

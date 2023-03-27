@@ -1,59 +1,88 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMemo } from 'react';
 import './App.css';
+import PostsClass from './components/API/fetchPosts/PostsClass';
 import FormNews from './components/FormNews';
+import { useFetching } from './components/hooks/useFetching';
+import { useSortedAndFilteredPosts } from './components/hooks/usePost';
+import Modal from './components/Modal/Modal';
 
 import NewsList from './components/NewsList';
 import PostFilter from './components/PostFilter';
-import Input from './components/UI/Inputs/Input';
-import MySorting from './components/UI/Sorting/MySorting';
+import AddButton from './components/UI/AddButton/Add_button';
+import { getPageCount } from './utils/utils';
 
 function App() {
-  const [posts, setPosts] = useState([
-    { id: 1, title: 'Abc', descr: 'Some descr 1' },
-    { id: 3, title: 'Tit', descr: 'Descr 2' },
-    { id: 4, title: 'Le2', descr: 'scr 2' },
-    { id: 5, title: 'Kbr', descr: 'me4' },
-  ]);
-
+  const [posts, setPosts] = useState([]);
   const [filterPost, setFilterPost] = useState({ query: '', sort: '' });
+  const [modal, setModal] = useState(false);
 
-  const sortedTopics = useMemo(() => {
-    // console.log('Hook 1 worked');
-    if (filterPost.sort) {
-      console.log(filterPost.sort);
+  //for pagination
+  const [totalPages,setTotalPages]=useState(0);
 
-      return [...posts].sort((a, b) =>
-        a[filterPost.sort].localeCompare(b[filterPost.sort])
-      );
-    }
-    return posts;
-  }, [filterPost.sort, posts]);
+  const pagesArray=[];
 
-  const filterdTopics = useMemo(() => {
-    // console.log('Hook 2 worked');
-    return sortedTopics.filter((t) =>
-      t.title.toLowerCase().includes(filterPost.query)
-    );
-  }, [filterPost.query, sortedTopics]);
+  for (let index = 0; index < totalPages; index++) {
+    pagesArray.push(index+1);
+  }
 
-  // console.log(filterdTopics);
+  const [postsLimit,setPostsLimit]=useState(10);
+  const [pageValue,setPageValue]=useState(1);
+
+  const sortedAndFilteredTopics = useSortedAndFilteredPosts(
+    posts,
+    filterPost.sort,
+    filterPost.query
+  );
 
   const addTopic = (post) => {
     setPosts([...posts, post]);
+    setModal(false);
   };
 
   const dealeateTopic = (postId) =>
     setPosts(posts.filter((p) => postId !== p.id));
 
+  const [fetchPosts, postLoading, postError] = useFetching(async () => {
+    const res = await PostsClass.getAll(postsLimit,pageValue);
+    const totalPosts=res.headers['x-total-count'];
+    setTotalPages(getPageCount(totalPosts,postsLimit));
+    setPosts(res.data);
+  });
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  
+
   return (
     <div className='App'>
       <h1>Newspaper</h1>
-      <FormNews func={addTopic}></FormNews>
+
+      <AddButton
+        style={{ marginBottom: '15px' }}
+        onClick={() => setModal(true)}
+      >
+        Add new post
+      </AddButton>
+      <Modal visible={modal} setVisible={setModal}>
+        <FormNews func={addTopic}></FormNews>
+      </Modal>
       <PostFilter filter={filterPost} setFilter={setFilterPost}></PostFilter>
       <hr style={{ marginBottom: '10px', border: '2px solid #000' }}></hr>
-
-      <NewsList remove={dealeateTopic} posts={filterdTopics}></NewsList>
+      {postError && <h2>Data error: {postError}</h2>}
+      {postLoading ? (
+        <h2>Loading...</h2>
+      ) : (
+        <NewsList
+          remove={dealeateTopic}
+          posts={sortedAndFilteredTopics}
+        ></NewsList>
+      )}
+      <div className='pagination'>
+        {pagesArray.map((p)=><span>{p}</span>)}
+      </div>
     </div>
   );
 }
