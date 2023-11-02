@@ -10,6 +10,7 @@ import AddButton from "../../components/UI/AddButton/Add_button";
 import NewsList from "../../components/NewsList";
 import Pagination from "../../components/UI/Pagination/Pagination";
 import { useObserver } from "../../components/hooks/useObserver";
+import MySorting from "../../components/UI/Sorting/MySorting";
 
 export const Posts = () => {
   const [posts, setPosts] = useState([]);
@@ -42,19 +43,20 @@ export const Posts = () => {
     const res = await PostsClass.getAll(postsLimit, pageValue);
     const totalPosts = res.headers["x-total-count"];
     setTotalPages(getPageCount(totalPosts, postsLimit));
-    setPosts([...posts, ...res.data]);
+    // setPosts([...posts, ...res.data]);
+    setPosts(res.data);
   });
 
-  useObserver(
-    postLoading,
-    pageValue < totalPages,
-    () => setPageValue(pageValue + 1),
-    lastElement
-  );
+  // useObserver(
+  //   postLoading,
+  //   pageValue < totalPages,
+  //   () => setPageValue(pageValue + 1),
+  //   lastElement
+  // );
 
   useEffect(() => {
     fetchPosts();
-  }, [pageValue]);
+  }, [pageValue,postsLimit]);
 
   const handlePageClick = (page) => {
     setPageValue(page);
@@ -75,6 +77,17 @@ export const Posts = () => {
       </Modal>
 
       <PostFilter filter={filterPost} setFilter={setFilterPost}></PostFilter>
+      <MySorting
+        value={postsLimit}
+        onChange={(value) => setPostsLimit(value)}
+        deafaultValue={"Выберите кол-во постов для показа"}
+        options={[
+          { name: "5", value: 5 },
+          { name: "10", value: 10 },
+          { name: "20", value: 20 },
+          { name: "Показать все", value: -1 },
+        ]}
+      />
       <hr style={{ marginBottom: "10px", border: "2px solid #000" }}></hr>
       {postError && <h2>Data error: {postError}</h2>}
       <NewsList remove={dealeateTopic} posts={sortedAndFilteredTopics} />
