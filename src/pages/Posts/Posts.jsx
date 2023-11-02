@@ -1,20 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { useSortedAndFilteredPosts } from '../../components/hooks/usePost';
-import { useFetching } from '../../components/hooks/useFetching';
-import PostsClass from '../../components/API/fetchPosts/PostsClass';
-import { getPageCount } from '../../utils/utils';
-import Modal from '../../components/Modal/Modal';
-import FormNews from '../../components/FormNews';
-import PostFilter from '../../components/PostFilter';
-import AddButton from '../../components/UI/AddButton/Add_button';
-import NewsList from '../../components/NewsList';
-import Pagination from '../../components/UI/Pagination/Pagination';
-
+import React, { useEffect, useRef, useState } from "react";
+import { useSortedAndFilteredPosts } from "../../components/hooks/usePost";
+import { useFetching } from "../../components/hooks/useFetching";
+import PostsClass from "../../components/API/fetchPosts/PostsClass";
+import { getPageCount } from "../../utils/utils";
+import Modal from "../../components/Modal/Modal";
+import FormNews from "../../components/FormNews";
+import PostFilter from "../../components/PostFilter";
+import AddButton from "../../components/UI/AddButton/Add_button";
+import NewsList from "../../components/NewsList";
+import Pagination from "../../components/UI/Pagination/Pagination";
+import { useObserver } from "../../components/hooks/useObserver";
 
 export const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [filterPost, setFilterPost] = useState({ query: "", sort: "" });
   const [modal, setModal] = useState(false);
+
+  const lastElement = useRef();
 
   //for pagination
   const [totalPages, setTotalPages] = useState(0);
@@ -40,8 +42,15 @@ export const Posts = () => {
     const res = await PostsClass.getAll(postsLimit, pageValue);
     const totalPosts = res.headers["x-total-count"];
     setTotalPages(getPageCount(totalPosts, postsLimit));
-    setPosts(res.data);
+    setPosts([...posts, ...res.data]);
   });
+
+  useObserver(
+    postLoading,
+    pageValue < totalPages,
+    () => setPageValue(pageValue + 1),
+    lastElement
+  );
 
   useEffect(() => {
     fetchPosts();
@@ -68,14 +77,12 @@ export const Posts = () => {
       <PostFilter filter={filterPost} setFilter={setFilterPost}></PostFilter>
       <hr style={{ marginBottom: "10px", border: "2px solid #000" }}></hr>
       {postError && <h2>Data error: {postError}</h2>}
-      {postLoading ? (
-        <h2>Loading...</h2>
-      ) : (
-        <NewsList
-          remove={dealeateTopic}
-          posts={sortedAndFilteredTopics}
-        ></NewsList>
-      )}
+      <NewsList remove={dealeateTopic} posts={sortedAndFilteredTopics} />
+      {postLoading && <h2>Loading...</h2>}
+      <div
+        ref={lastElement}
+        style={{ height: "20px", backgroundColor: "red" }}
+      ></div>
       <Pagination
         page={pageValue}
         total={totalPages}

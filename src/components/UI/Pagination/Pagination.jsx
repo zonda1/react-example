@@ -8,6 +8,7 @@ const Pagination = ({ page, onClick, total }) => {
     <div className="pagination">
       {pagesArray.map((p) => (
         <span
+        key={p}
           className={page === p ? "page page--current" : "page"}
           onClick={() => onClick(p)}
         >
