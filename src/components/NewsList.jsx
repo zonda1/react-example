@@ -13,7 +13,7 @@ const NewsList = ({ posts, remove }) => {
       {posts.map((post, index) => (
         <News
           remove={remove}
-          number={index + 1}
+          number={post.id}
           post={post}
           key={post.id}
         ></News>

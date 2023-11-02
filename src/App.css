@@ -13,9 +13,45 @@ select {
   margin-bottom: 15px;
 }
 
-.pagination span {
+.page {
   padding: 5px;
-  border: 1px solid firebrick;
+  border: 1px solid #000;
   margin-right: 5px;
   cursor: pointer;
+}
+
+.page--current {
+  background-color: #000;
+  color: aliceblue;
+}
+
+.comments {
+  display: flex;
+  margin-top: 20px;
+}
+
+.user__info {
+  flex: 0 0 30%;
+  margin-right: 15px;
+}
+
+.user__comment {
+  flex: 1 1 auto;
+}
+
+.user__name,
+.user__email {
+  display: flex;
+}
+
+.nav__wrapper {
+  display: flex;
+  justify-content:space-between;
+}
+.nav__wrapper button {
+  order: 2;
+}
+
+.nav {
+  order: 1;
 }

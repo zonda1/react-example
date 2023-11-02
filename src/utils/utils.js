@@ -1,1 +1,1 @@
-export const getPageCount=(total,perPage)=> Math.ceil(total/perPage);
+export const getPageCount = (total, perPage) => Math.ceil(total / perPage);
